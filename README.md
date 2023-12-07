@@ -17,7 +17,7 @@ bun run index.ts
 To test:
 
 ```bash
-bun run index.ts
+bun test
 ```
 
 This project was created using `bun init` in bun v1.0.11. [Bun](https://bun.sh)
