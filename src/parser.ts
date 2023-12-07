@@ -1,7 +1,7 @@
-type JysmolType = JysmolObject | JysmolArray | JysmolPrimitive
-type JysmolPrimitive = number | string | null | boolean
-type JysmolObject = {[key: string]: JysmolType}
-type JysmolArray = JysmolType[]
+export type JysmolType = JysmolObject | JysmolArray | JysmolPrimitive
+export type JysmolPrimitive = number | string | null | boolean
+export type JysmolObject = {[key: string]: JysmolType}
+export type JysmolArray = JysmolType[]
 
 export class JysmolParser {
     private position: number
@@ -64,6 +64,7 @@ export class JysmolParser {
     private parseObject(): JysmolObject {
         const obj: JysmolObject = {}
         this.advance()
+        this.skipWhitespace()
 
         while(this.ch !== '}' && this.position < this.input.length) {
             const key = this.parseString()
