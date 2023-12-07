@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 
 import Jysmol from '../src'
 
-describe("performance", () => {
+describe("performance - compared to json", () => {
     function generateItemData(n: number) {
         return {
             aaaaa: n,
@@ -20,21 +20,51 @@ describe("performance", () => {
 
     test('array', () => {
         cases.forEach((items) => {
-        const data = generateArrayData(items, 10)
+            const data = generateArrayData(items, 10)
 
-        const stringifyStart = performance.now()
-        const stringified = Jysmol.stringify(data)
-        const stringifyEnd = performance.now()
+            const stringifyStartJYSMOL = performance.now()
+            const stringifiedJYSMOL = Jysmol.stringify(data)
+            const stringifyEndJYSMOL = performance.now()
 
-        const parseStart = performance.now()
-        const parsed = Jysmol.parse(stringified)
-        const parseEnd = performance.now()
+            const parseStartJYSMOL = performance.now()
+            const parsedJYSMOL = Jysmol.parse(stringifiedJYSMOL)
+            const parseEndJYSMOL = performance.now()
 
-        expect(parsed).toEqual(data)
+            expect(parsedJYSMOL).toEqual(data)
 
-        console.log(items)
-        console.log('stringifying', stringifyEnd - stringifyStart, 'ms')
-        console.log('parsing', parseEnd - parseStart, 'ms')
+            //////////////////////////////////////////////////////
+
+            const stringifyStartJSON = performance.now()
+            const stringifiedJSON = JSON.stringify(data)
+            const stringifyEndJSON = performance.now()
+
+            const parseStartJSON = performance.now()
+            JSON.parse(stringifiedJSON)
+            const parseEndJSON = performance.now()
+
+            const stringifyPerfJYSMOL = stringifyEndJYSMOL - stringifyStartJYSMOL
+            const parsePerfJYSMOL = parseEndJYSMOL - parseStartJYSMOL
+
+            const stringifyPerfJSON = stringifyEndJSON - stringifyStartJSON
+            const parsePerfJSON = parseEndJSON - parseStartJSON
+
+            //////////////////////////////////////////////////////
+
+            console.log({
+                items,
+                stringify: {
+                    JYSMOL: stringifyPerfJYSMOL,
+                    JSON: stringifyPerfJSON,
+                    'JYSMOL - JSON': stringifyPerfJYSMOL - stringifyPerfJSON,
+                    'JYSMOL / JSON': stringifyPerfJYSMOL / stringifyPerfJSON
+                },
+                parse: {
+                    JYSMOL: parsePerfJYSMOL,
+                    JSON: parsePerfJSON,
+                    'JYSMOL - JSON': parsePerfJYSMOL - parsePerfJSON,
+                    'JYSMOL / JSON': parsePerfJYSMOL / parsePerfJSON
+                },
+            })
         })
     })
 })
