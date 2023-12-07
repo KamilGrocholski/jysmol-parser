@@ -15,7 +15,7 @@ export class JysmolParser {
         this.advance()
     }
 
-    static parse(input: string): JysmolType | undefined {
+    static parse(input: string): JysmolType {
         const p = new JysmolParser(input)
 
         return p.parseValue()
