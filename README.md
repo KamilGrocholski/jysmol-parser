@@ -8,12 +8,6 @@ To install dependencies:
 bun install
 ```
 
-To run:
-
-```bash
-bun run index.ts
-```
-
 To test:
 
 ```bash
