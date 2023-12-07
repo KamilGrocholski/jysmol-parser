@@ -1,25 +1,27 @@
-type JSONType = JSONObject | JSONArray | JSONPrimitive
-type JSONPrimitive = number | string | null | boolean
-type JSONObject = {[key: string]: JSONType}
-type JSONArray = JSONType[]
+type JysmolType = JysmolObject | JysmolArray | JysmolPrimitive
+type JysmolPrimitive = number | string | null | boolean
+type JysmolObject = {[key: string]: JysmolType}
+type JysmolArray = JysmolType[]
 
-export class JSONParser {
+export class JysmolParser {
     private position: number
     private ch!: string
+    private coords: {line: number, positionAtLine: number}
 
     constructor(private input: string) {
         this.position = -1
+        this.coords = {line: 1, positionAtLine: 0}
 
         this.advance()
     }
 
-    static parse(input: string): JSONType | undefined {
-        const p = new JSONParser(input)
+    static parse(input: string): JysmolType | undefined {
+        const p = new JysmolParser(input)
 
         return p.parseValue()
     }
 
-    private parseValue(): JSONType {
+    private parseValue(): JysmolType {
         this.skipWhitespace()
 
         switch (this.ch) {
@@ -38,14 +40,14 @@ export class JSONParser {
         }
 
         if (isAlpha(this.ch)) return this.parseKeywordValue()
-
-        throw new Error("no value")
+        
+        throw new Error(`unexpected token: '${this.ch}', at line ${this.coords.line} position ${this.coords.positionAtLine}`)
     }
 
     private parseKeywordValue(): null | boolean {
         let keyword = ""
 
-        while (isAlpha(this.ch)) {
+        while (isAlpha(this.ch) && this.position < this.input.length) {
             keyword += this.ch
             this.advance()
         }
@@ -59,8 +61,8 @@ export class JSONParser {
         throw new Error(`not allowed keyword: ${keyword}`)
     }
 
-    private parseObject(): JSONObject {
-        const obj: JSONObject = {}
+    private parseObject(): JysmolObject {
+        const obj: JysmolObject = {}
         this.advance()
 
         while(this.ch !== '}' && this.position < this.input.length) {
@@ -81,8 +83,8 @@ export class JSONParser {
         return obj
     }
 
-    private parseArray(): JSONArray {
-        const arr: JSONArray = []
+    private parseArray(): JysmolArray {
+        const arr: JysmolArray = []
         this.advance()
 
         while(this.ch !== ']' && this.position < this.input.length) {
@@ -141,7 +143,9 @@ export class JSONParser {
     }
 
     private eat(ch: string): void {
-        if (this.ch !== ch) throw new Error(`expected: '${ch}', got: '${this.ch}', at: ${this.position}`)
+        if (this.ch !== ch) throw new Error(
+            `expected: '${ch}', got: '${this.ch}', at line ${this.coords.line} position ${this.coords.positionAtLine}`
+        )
         this.advance()
     }
 
@@ -151,6 +155,13 @@ export class JSONParser {
             this.ch = '\0'
         } else {
             this.ch = this.input[this.position]
+        }
+
+        if (this.ch === '\n') {
+            this.coords.line++
+            this.coords.positionAtLine = 0
+        } else {
+            this.coords.positionAtLine++
         }
     }
 
